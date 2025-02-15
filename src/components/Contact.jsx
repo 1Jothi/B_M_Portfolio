@@ -7,8 +7,6 @@ import { EarthCanvas } from "./canvas";
 import { SectionWrapper } from "../hoc";
 import { slideIn } from "../utils/motion";
 
-
-
 const Contact = () => {
   const formRef = useRef();
   const [form, setForm] = useState({
@@ -16,8 +14,6 @@ const Contact = () => {
     email: "",
     message: "",
   });
-
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { target } = e;
@@ -29,47 +25,71 @@ const Contact = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   console.log("Form submitted!"); 
+
+  //   emailjs
+  //     .send(
+  //       import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
+  //       import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
+  //       {
+  //         from_name: form.name,
+  //         to_name: "Santhosh ",
+  //         from_email: form.email,
+  //         to_email: "murugusanthosh.rs07@gmail.com",
+  //         message: form.message,
+  //       },
+  //       import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
+  //     )
+  //     .then(
+  //       () => {
+  //         alert("Message sent successfully.");
+  //         setForm({
+  //           name: "",
+  //           email: "",
+  //           message: "",
+  //         });
+  //       },
+  //       (error) => {
+  //         console.error(error);
+  //         alert("Message not sent. Please try again.");
+  //       }
+  //     );
+  // };
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-
-    emailjs
-      .send(
-        import.meta.env.VITE_APP_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_APP_EMAILJS_TEMPLATE_ID,
-        {
-          from_name: form.name,
-          to_name: "SANTHOSH Offl",
-          from_email: form.email,
-          to_email: "murugusanthosh.rs07@gmail.com",
+    console.log("Form submitted!"); 
+  
+    try {
+      const response = await fetch("http://localhost:5000/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
           message: form.message,
-        },
-        import.meta.env.VITE_APP_EMAILJS_PUBLIC_KEY
-      )
-      .then(
-        () => {
-          setLoading(false);
-          alert("Thank you. I will get back to you as soon as possible.");
-
-          setForm({
-            name: "",
-            email: "",
-            message: "",
-          });
-        },
-        (error) => {
-          setLoading(false);
-          console.error(error);
-
-          alert("Ahh, something went wrong. Please try again.");
-        }
-      );
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        setForm({ name: "", email: "", message: "" });
+      } else {
+        alert("Message not sent. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Message not sent. Please try again.");
+    }
   };
+  
 
   return (
-    <div
-      className={`xl:mt-12 flex xl:flex-row flex-col-reverse gap-10 overflow-hidden`}
-    >
+    <div className={`xl:mt-12 flex xl:flex-row flex-col-reverse gap-10 overflow-hidden`}>
       <motion.div
         variants={slideIn("left", "tween", 0.2, 1)}
         className='flex-[0.75] bg-black-100 p-8 rounded-2xl'
@@ -120,7 +140,7 @@ const Contact = () => {
             type='submit'
             className='bg-tertiary py-3 px-8 rounded-xl outline-none w-fit text-white font-bold shadow-md shadow-primary'
           >
-            {loading ? "Sending..." : "Send"}
+            Send
           </button>
         </form>
       </motion.div>
